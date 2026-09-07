@@ -16,6 +16,7 @@ import { calcEcoBalance } from "./utils/gameLogic"
 import { ecoEvents, getActiveEvent } from "./data/events"
 import { getLang, setLang, t } from "./services/i18n"
 import { toCSV, downloadCSV } from "./utils/export"
+import { audio } from "./services/audio"
 
 type View = "menu" | "world" | "missions" | "play" | "badges" | "inventory" | "leaderboard" | "learn" | "settings" | "teacher"
 
@@ -65,6 +66,7 @@ export default function App() {
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(""), 2000) }
   const toggleLang = () => { const next = lang === "id" ? "en" : "id"; setLang(next as never); setLangState(next as never); showToast(next === "id" ? "Bahasa: Indonesia" : "Language: English") }
+  const [muted, setMuted] = useState(audio.isMuted())
   const handleExportCSV = () => {
     const rows = [
       { name: store.name, level: store.level, xp: store.xp, eco: store.ecoPoints, missions: store.completedMissions.length, quiz: store.quizScore, badges: store.badges },
@@ -384,8 +386,13 @@ export default function App() {
             <h2 className="text-2xl font-black">⚙️ Pengaturan</h2>
             <div className="card">
               <h3 className="font-bold">🔊 Audio</h3>
-              <p className="text-sm text-gray-600">Background music & SFX (placeholder — gunakan aset CC0)</p>
-              <div className="flex gap-2 mt-2"><button onClick={() => showToast("Mute All — diterapkan")} className="btn-secondary text-sm">🔇 Mute All</button><button onClick={() => showToast("Volume 80%")} className="btn-secondary text-sm">🔊 Volume 80%</button></div>
+              <p className="text-sm text-gray-600">SFX WebAudio (CC0 placeholder) — <code>src/services/audio.ts</code></p>
+              <div className="flex gap-2 mt-2 flex-wrap">
+                <button onClick={() => { const v = !muted; audio.setMuted(v); setMuted(v); audio.click(); showToast(v ? "🔇 Muted" : "🔊 Sound on") }} className="btn-secondary text-sm">{muted ? "🔇 Muted" : "🔊 Sound On"}</button>
+                <button onClick={() => { audio.setVolume(0.8); audio.success(); showToast("Volume 80%") }} className="btn-secondary text-sm">🔊 80%</button>
+                <button onClick={() => { audio.success(); showToast("Test success sound") }} className="btn-secondary text-sm">🎵 Test</button>
+                <button onClick={() => { audio.levelUp(); showToast("Level up!") }} className="btn-secondary text-sm">⭐ LevelUp</button>
+              </div>
             </div>
             <div className="card">
               <h3 className="font-bold">♿ Aksesibilitas</h3>
