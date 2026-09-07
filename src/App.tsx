@@ -5,13 +5,14 @@ import { missions } from "./data/missions"
 import { badges } from "./data/badges"
 import { quizzes } from "./data/quizzes"
 import { levels, ecoFacts, ecoTips } from "./data/levels"
-import PilahSampah from "./games/PilahSampah"
-import TanamPohon from "./games/TanamPohon"
-import DetektifKarhutla from "./games/DetektifKarhutla"
-import BersihkanSungai from "./games/BersihkanSungai"
-import EcoQuiz from "./games/EcoQuiz"
-import EcoMemory from "./games/EcoMemory"
-import BangunEcoSchool from "./games/BangunEcoSchool"
+import { lazy, Suspense } from "react"
+const PilahSampah = lazy(() => import("./games/PilahSampah"))
+const TanamPohon = lazy(() => import("./games/TanamPohon"))
+const DetektifKarhutla = lazy(() => import("./games/DetektifKarhutla"))
+const BersihkanSungai = lazy(() => import("./games/BersihkanSungai"))
+const EcoQuiz = lazy(() => import("./games/EcoQuiz"))
+const EcoMemory = lazy(() => import("./games/EcoMemory"))
+const BangunEcoSchool = lazy(() => import("./games/BangunEcoSchool"))
 import { calcEcoBalance } from "./utils/gameLogic"
 import { ecoEvents, getActiveEvent } from "./data/events"
 import { getLang, setLang, t } from "./services/i18n"
@@ -243,16 +244,18 @@ export default function App() {
               </div>
             )}
             {phase === "game" && (
-              <div>
-                {activeMission.level === 6 || activeMission.id === "recycle-001" ? <PilahSampah onComplete={handleGameComplete} /> :
-                  activeMission.level === 4 ? <TanamPohon onComplete={() => handleGameComplete(3)} /> :
-                    activeMission.level === 3 ? <DetektifKarhutla onComplete={handleGameComplete} /> :
-                      activeMission.level === 5 ? <BersihkanSungai onComplete={handleGameComplete} /> :
-                        activeMission.level === 9 ? <BangunEcoSchool onComplete={() => handleGameComplete(3)} /> :
-                          activeMission.level === 2 ? <EcoMemory onComplete={handleGameComplete} /> :
-                            <EcoQuiz questions={quizzes.filter((q) => q.level === activeMission.level).slice(0, 5)} onFinish={handleGameComplete} />}
-                <button onClick={() => setPhase("result")} className="btn-secondary w-full mt-3">Lewati Game (Demo)</button>
-              </div>
+              <Suspense fallback={<div className="card text-center py-8">⏳ Memuat game...</div>}>
+                <div>
+                  {activeMission.level === 6 || activeMission.id === "recycle-001" ? <PilahSampah onComplete={handleGameComplete} /> :
+                    activeMission.level === 4 ? <TanamPohon onComplete={() => handleGameComplete(3)} /> :
+                      activeMission.level === 3 ? <DetektifKarhutla onComplete={handleGameComplete} /> :
+                        activeMission.level === 5 ? <BersihkanSungai onComplete={handleGameComplete} /> :
+                          activeMission.level === 9 ? <BangunEcoSchool onComplete={() => handleGameComplete(3)} /> :
+                            activeMission.level === 2 ? <EcoMemory onComplete={handleGameComplete} /> :
+                              <EcoQuiz questions={quizzes.filter((q) => q.level === activeMission.level).slice(0, 5)} onFinish={handleGameComplete} />}
+                  <button onClick={() => setPhase("result")} className="btn-secondary w-full mt-3">Lewati Game (Demo)</button>
+                </div>
+              </Suspense>
             )}
             {phase === "result" && (
               <div className="card text-center">
@@ -373,9 +376,11 @@ export default function App() {
                 ))}
               </div>
               {quizLevel && (
-                <div className="mt-4">
-                  <EcoQuiz questions={quizzes.filter((q) => q.level === quizLevel).slice(0, 5)} onFinish={(s) => { showToast(`Quiz selesai! Skor ${s}/5`); setQuizLevel(null) }} />
-                </div>
+                <Suspense fallback={<div className="text-center py-4">⏳ Memuat quiz...</div>}>
+                  <div className="mt-4">
+                    <EcoQuiz questions={quizzes.filter((q) => q.level === quizLevel).slice(0, 5)} onFinish={(s) => { showToast(`Quiz selesai! Skor ${s}/5`); setQuizLevel(null) }} />
+                  </div>
+                </Suspense>
               )}
             </div>
           </div>
