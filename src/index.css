@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { font-family: 'Nunito', system-ui, sans-serif; }
+h1,h2,h3 { font-family: 'Fredoka', sans-serif; }
+
+@layer components {
+  .card { @apply bg-white rounded-3xl shadow-lg border border-eco-100 p-4 md:p-6; }
+  .btn-primary { @apply bg-eco-600 hover:bg-eco-700 text-white font-bold px-6 py-3 rounded-2xl shadow-md transition disabled:opacity-50; }
+  .btn-secondary { @apply bg-white hover:bg-eco-50 text-eco-700 border-2 border-eco-200 font-bold px-6 py-3 rounded-2xl transition; }
+  .badge-pill { @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold; }
+  .progress-track { @apply w-full h-4 bg-eco-100 rounded-full overflow-hidden; }
+  .progress-fill { @apply h-full bg-gradient-to-r from-eco-400 to-eco-600 rounded-full transition-all duration-700; }
+}
+
+:focus-visible { outline: 3px solid #22c55e; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #86efac; border-radius: 999px; }
