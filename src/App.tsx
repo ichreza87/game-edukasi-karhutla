@@ -13,6 +13,9 @@ import EcoQuiz from "./games/EcoQuiz"
 import EcoMemory from "./games/EcoMemory"
 import BangunEcoSchool from "./games/BangunEcoSchool"
 import { calcEcoBalance } from "./utils/gameLogic"
+import { ecoEvents, getActiveEvent } from "./data/events"
+import { getLang, setLang, t } from "./services/i18n"
+import { toCSV, downloadCSV } from "./utils/export"
 
 type View = "menu" | "world" | "missions" | "play" | "badges" | "inventory" | "leaderboard" | "learn" | "settings" | "teacher"
 
@@ -24,6 +27,9 @@ export default function App() {
   const [quizLevel, setQuizLevel] = useState<number | null>(null)
   const [showMissionComplete, setShowMissionComplete] = useState(false)
   const [toast, setToast] = useState("")
+  const [lang, setLangState] = useState(getLang())
+  const [highContrast, setHighContrast] = useState(false)
+  const activeEvent = getActiveEvent()
   const store = useGameStore()
 
   useEffect(() => { store.checkStreak() }, [])
@@ -58,9 +64,25 @@ export default function App() {
   const ecoBalance = calcEcoBalance(ecoWorld)
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(""), 2000) }
+  const toggleLang = () => { const next = lang === "id" ? "en" : "id"; setLang(next as never); setLangState(next as never); showToast(next === "id" ? "Bahasa: Indonesia" : "Language: English") }
+  const handleExportCSV = () => {
+    const rows = [
+      { name: store.name, level: store.level, xp: store.xp, eco: store.ecoPoints, missions: store.completedMissions.length, quiz: store.quizScore, badges: store.badges },
+      { name: "Siti", level: 4, xp: 890, eco: 420, missions: 6, quiz: 85, badges: ["recycle-master"] },
+      { name: "Budi", level: 3, xp: 750, eco: 380, missions: 5, quiz: 78, badges: ["green-starter"] },
+    ]
+    downloadCSV(toCSV(rows))
+    showToast("CSV terunduh ✓")
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-eco-50 to-white">
+    <div className={`min-h-screen ${highContrast ? "bg-white text-black contrast-more" : "bg-gradient-to-b from-eco-50 to-white"}`}>
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-eco-700 text-white px-4 py-2 rounded-xl z-50">Skip to content</a>
+      {activeEvent && (
+        <div className="bg-amber-400 text-amber-900 text-center text-sm font-bold py-2 px-4">
+          {activeEvent.emoji} EVENT: {activeEvent.title} — {activeEvent.description} 🎯 {activeEvent.goal} ({activeEvent.start}→{activeEvent.end})
+        </div>
+      )}
       <Header onNav={(v) => setView(v as View)} />
       {toast && <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-eco-700 text-white px-6 py-2 rounded-full font-bold shadow-lg z-50" role="status">{toast}</div>}
       {showMissionComplete && activeMission && (
@@ -82,7 +104,11 @@ export default function App() {
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-1 flex justify-end gap-2">
+        <button onClick={toggleLang} className="text-xs font-bold border border-eco-200 px-3 py-1 rounded-full bg-white" aria-label="Ganti bahasa">{lang === "id" ? "🇮🇩 ID" : "🇬🇧 EN"} • {t("teacher")}</button>
+        <button onClick={() => setHighContrast((v) => !v)} className="text-xs font-bold border border-eco-200 px-3 py-1 rounded-full bg-white" aria-pressed={highContrast}>♿ {highContrast ? "Normal" : "High Contrast"}</button>
+      </div>
+      <main id="main" className="max-w-6xl mx-auto px-4 py-6">
         {view === "menu" && (
           <div className="space-y-6">
             <div className="card bg-gradient-to-br from-eco-500 to-eco-700 text-white border-none text-center py-10">
@@ -363,7 +389,8 @@ export default function App() {
             </div>
             <div className="card">
               <h3 className="font-bold">♿ Aksesibilitas</h3>
-              <ul className="text-sm list-disc list-inside text-gray-600"><li>Keyboard navigation didukung</li><li>High contrast & font readable</li><li>Reduced motion (prefers-reduced-motion)</li><li>Tombol besar & label ARIA</li></ul>
+              <ul className="text-sm list-disc list-inside text-gray-600"><li>Keyboard navigation + Skip link</li><li>High contrast toggle (atas halaman)</li><li>Bahasa {lang === "id" ? "Indonesia / English toggle" : "English / Indonesian toggle"}</li><li>Reduced motion (prefers-reduced-motion)</li><li>Tombol besar & label ARIA</li><li>Event banner configurable via <code>src/data/events.ts</code></li></ul>
+              <p className="text-xs mt-2">Events aktif: {ecoEvents.length} (Bumi, Lingkungan, Air) — edit JSON untuk tambah event.</p>
             </div>
             <div className="card">
               <h3 className="font-bold">💾 Save System</h3>
@@ -398,8 +425,8 @@ export default function App() {
                 </tbody>
               </table>
               <div className="flex gap-2 mt-3">
-                <button onClick={() => showToast("Export CSV — segera unduh")} className="btn-secondary text-sm">📥 Export CSV</button>
-                <button onClick={() => showToast("Export PDF — segera unduh")} className="btn-secondary text-sm">📄 Export PDF</button>
+                <button onClick={handleExportCSV} className="btn-secondary text-sm">📥 Export CSV</button>
+                <button onClick={() => showToast("Export PDF — gunakan Print → Save as PDF")} className="btn-secondary text-sm">📄 Export PDF</button>
               </div>
             </div>
             <div className="card">
