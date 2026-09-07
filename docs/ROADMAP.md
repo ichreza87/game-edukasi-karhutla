@@ -1,8 +1,11 @@
 # ROADMAP
 
-- **v0.1** — Playable prototype (✅ done)
-- **v0.2** — Mini-games lengkap (✅ 7 games)
-- **v0.3** — Eco World dinamis (✅)
-- **v0.4** — Teacher dashboard (✅)
-- **v0.5** — Offline/PWA (✅ manifest + sw)
-- **v1.0** — Stable educational release — butuh: sound CC0, lesson plan uji kelas, audit aksesibilitas, Lighthouse >90
+- **v0.1** — Playable prototype (✅ 10 levels, 7 mini-games, XP/badges, save)
+- **v0.2** — Eco World dinamis + Teacher dashboard + PWA icons real + i18n id/en + events + CSV export + a11y
+- **v0.3** — Audio WebAudio + API abstraction (Frontend→api→repo→localStorage / backend) (✅)
+- **v1.0** — Stable educational release — perlu: uji kelas 1 SD + 1 SMP, Lighthouse >90, ganti SFX placeholder dengan CC0 nyata (freesound.org), tambah lesson plan video
+
+## Next
+- Ganti beep WebAudio dengan file CC0 di `public/sounds/`
+- Sambung `src/services/api.ts` ke backend nyata (Supabase/Firebase/Express)
+- Tambah IndexedDB untuk quiz besar
